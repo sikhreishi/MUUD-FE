@@ -5,6 +5,7 @@ import MuudInput from '../components/MuudInput';
 import MuudButton from '../components/MuudButton';
 import SocialLoginButtons from '../components/SocialLoginButtons';
 import { theme } from '../theme/theme';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MUUD_LOGO = require('../assets/muud_logo.png'); // Replace with your actual logo path
 
@@ -17,11 +18,12 @@ const LoginScreen = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       const result = await login({ username, password }).unwrap();
-      // Save token to storage if needed
+      console.log('Login response:', result);
+      // Save token and user id to AsyncStorage
+      await AsyncStorage.setItem('token', result.token);
+      await AsyncStorage.setItem('user_id', result.user.id.toString());
       navigation.navigate('JournalEntry');
-      console.log('Login successful:', result);
     } catch (err) {
-      // Error handled below
       console.log('Login failed:', err);
     }
   };

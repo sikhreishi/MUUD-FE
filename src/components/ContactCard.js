@@ -1,11 +1,10 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
-const ContactCard = ({ name, phone, relation }) => (
+const ContactCard = ({ contact_name, contact_email }) => (
   <View style={styles.card}>
-    <Text style={styles.contactName}>{name}</Text>
-    <Text style={styles.contactDetail}>Phone: {phone}</Text>
-    <Text style={styles.contactDetail}>Relation: {relation}</Text>
+    <Text style={styles.contactName}>{contact_name}</Text>
+    <Text style={styles.contactDetail}>Email: {contact_email}</Text>
   </View>
 );
 

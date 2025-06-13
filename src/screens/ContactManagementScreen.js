@@ -1,36 +1,55 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, StyleSheet } from 'react-native';
 import ContactCard from '../components/ContactCard';
 import ContactForm from '../components/ContactForm';
-
-// Static contacts for demo
-const initialContacts = [
-  { id: 1, name: 'Alice Johnson', phone: '555-1234', relation: 'Friend' },
-  { id: 2, name: 'Bob Smith', phone: '555-5678', relation: 'Family' },
-  { id: 3, name: 'Carol Lee', phone: '555-8765', relation: 'Therapist' },
-];
+import { useGetContactsQuery } from '../redux/apiSlice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
 
 const ContactManagementScreen = () => {
-  const [contacts, setContacts] = useState(initialContacts);
+  const [userId, setUserId] = useState(null);
+  const navigation = useNavigation();
 
-  const handleAddContact = (contact) => {
-    setContacts([
-      ...contacts,
-      { ...contact, id: contacts.length ? contacts[contacts.length - 1].id + 1 : 1 },
-    ]);
-  };
+  useEffect(() => {
+    (async () => {
+      const storedUserId = await AsyncStorage.getItem('user_id');
+      setUserId(storedUserId ? parseInt(storedUserId, 10) : null);
+    })();
+  }, []);
+
+  const { data, isLoading, error, refetch } = useGetContactsQuery(userId, { skip: !userId });
+  const contacts = data?.contacts || [];
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (userId) refetch();
+    });
+    return unsubscribe;
+  }, [navigation, userId]);
+
+  // Debug logs
+  console.log('ContactManagementScreen userId:', userId);
+  console.log('Contacts loading:', isLoading);
+  console.log('Contacts error:', error);
+  console.log('Contacts data:', data);
 
   return (
     <View style={styles.container}>
-      <ContactForm onAdd={handleAddContact} />
+      <ContactForm onAdd={refetch} />
       <Text style={styles.listTitle}>Current Contacts</Text>
-      <FlatList
-        data={contacts}
-        renderItem={({ item }) => <ContactCard {...item} />}
-        keyExtractor={(item) => item.id.toString()}
-        contentContainerStyle={{ paddingBottom: 24 }}
-        showsVerticalScrollIndicator={false}
-      />
+      {isLoading ? (
+        <Text>Loading...</Text>
+      ) : error ? (
+        <Text style={{ color: 'red' }}>Failed to load contacts</Text>
+      ) : (
+        <FlatList
+          data={contacts}
+          renderItem={({ item }) => <ContactCard {...item} />}
+          keyExtractor={(item) => item.id.toString()}
+          contentContainerStyle={{ paddingBottom: 24 }}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
     </View>
   );
 };

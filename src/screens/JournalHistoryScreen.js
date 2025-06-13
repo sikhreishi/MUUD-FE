@@ -1,33 +1,20 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, ActivityIndicator } from 'react-native';
-// import { useGetJournalEntriesQuery } from '../services/apiSlice';
+import { useGetJournalEntriesQuery } from '../redux/apiSlice';
 
-const staticData = [
-  { id: 1, mood: 5, entry: 'Had a fantastic day at the park with friends!', created_at: '2024-06-14T10:00:00Z' },
-  { id: 2, mood: 3, entry: 'Work was a bit stressful, but I managed.', created_at: '2024-06-13T09:30:00Z' },
-  { id: 3, mood: 4, entry: 'Enjoyed a good book and some quiet time.', created_at: '2024-06-12T20:15:00Z' },
-  { id: 4, mood: 2, entry: 'Felt a bit under the weather today.', created_at: '2024-06-11T14:45:00Z' },
-  { id: 5, mood: 5, entry: 'Accomplished a lot! Very productive.', created_at: '2024-06-10T18:00:00Z' },
-  { id: 6, mood: 1, entry: 'Tough day, but tomorrow is a new start.', created_at: '2024-06-09T21:00:00Z' },
-  { id: 7, mood: 4, entry: 'Had a great workout and healthy meal.', created_at: '2024-06-08T07:30:00Z' },
-  { id: 8, mood: 3, entry: 'Watched a movie and relaxed.', created_at: '2024-06-07T22:00:00Z' },
-];
-
-const JournalCard = ({ mood, entry, created_at }) => (
+const JournalCard = ({ mood_rating, entry_text, timestamp }) => (
   <View style={styles.card}>
     <View style={styles.header}>
-      <Text style={styles.mood}>Mood: {mood}</Text>
-      <Text style={styles.date}>{new Date(created_at).toLocaleDateString()}</Text>
+      <Text style={styles.mood}>Mood: {mood_rating}</Text>
+      <Text style={styles.date}>{new Date(timestamp).toLocaleDateString()}</Text>
     </View>
-    <Text style={styles.entry}>{entry}</Text>
+    <Text style={styles.entry}>{entry_text}</Text>
   </View>
 );
 
 const JournalHistoryScreen = () => {
-  // const { data, error, isLoading } = useGetJournalEntriesQuery();
-  const data = staticData;
-  const isLoading = false;
-  const error = false;
+  const userId = 1; // Replace with dynamic user id if available
+  const { data, error, isLoading } = useGetJournalEntriesQuery(userId);
 
   if (isLoading) {
     return (
@@ -46,7 +33,9 @@ const JournalHistoryScreen = () => {
     );
   }
 
-  if (!data || data.length === 0) {
+  const entries = data?.entries || [];
+
+  if (!entries.length) {
     return (
       <View style={styles.center}>
         <Text style={styles.emptyText}>No journal entries yet. Start writing your thoughts!</Text>
@@ -58,7 +47,7 @@ const JournalHistoryScreen = () => {
     <View style={styles.container}>
       <Text style={styles.title}>Journal History</Text>
       <FlatList
-        data={data}
+        data={entries}
         renderItem={({ item }) => <JournalCard {...item} />}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={{ paddingBottom: 24 }}

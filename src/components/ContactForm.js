@@ -1,45 +1,49 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 
 const ContactForm = ({ onAdd }) => {
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [relation, setRelation] = useState('');
+  const [contactName, setContactName] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
   const [error, setError] = useState('');
 
-  const handleAdd = () => {
-    if (!name.trim() || !phone.trim() || !relation.trim()) {
+  const handleAdd = async () => {
+    if (!contactName.trim() || !contactEmail.trim()) {
       setError('Please fill in all fields.');
       return;
     }
     setError('');
-    onAdd({ name, phone, relation });
-    setName('');
-    setPhone('');
-    setRelation('');
+    try {
+      const result = await onAdd({ contact_name: contactName, contact_email: contactEmail });
+      if (result && result.success) {
+        Alert.alert('Success', 'Contact added successfully');
+        setContactName('');
+        setContactEmail('');
+      } else {
+        Alert.alert('Error', result?.error || 'Failed to add contact');
+      }
+    } catch (err) {
+      Alert.alert('Error', err?.message || 'Failed to add contact');
+    }
   };
 
   return (
     <View style={styles.form}>
       <Text style={styles.formTitle}>Add New Contact</Text>
+      <Text style={styles.inputLabel}>Contact Name</Text>
       <TextInput
         style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
+        placeholder="Enter contact name"
+        value={contactName}
+        onChangeText={setContactName}
       />
+      <Text style={styles.inputLabel}>Contact Email</Text>
       <TextInput
         style={styles.input}
-        placeholder="Phone"
-        value={phone}
-        onChangeText={setPhone}
-        keyboardType="phone-pad"
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Relation (e.g. Friend, Family)"
-        value={relation}
-        onChangeText={setRelation}
+        placeholder="Enter contact email"
+        value={contactEmail}
+        onChangeText={setContactEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <TouchableOpacity style={styles.addButton} onPress={handleAdd}>
@@ -79,10 +83,11 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#3d215b',
-    paddingVertical: 12,
+    paddingVertical: 14,
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 4,
+    width: '100%',
   },
   addButtonText: {
     color: '#fff',
@@ -93,6 +98,13 @@ const styles = StyleSheet.create({
     color: 'red',
     marginBottom: 8,
     alignSelf: 'flex-start',
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#3d215b',
+    marginBottom: 4,
+    marginLeft: 2,
   },
 });
 

@@ -1,9 +1,9 @@
 import React from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, ViewStyle, TextStyle, TextInputProps, Text } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text } from 'react-native';
 
 const MuudInput = ({
   value = '',
-  onChangeText = () => {} ,
+  onChangeText = () => {},
   placeholder = '',
   secureTextEntry = false,
   showToggle = false,
@@ -19,7 +19,10 @@ const MuudInput = ({
       onChangeText={onChangeText}
       placeholder={placeholder}
       placeholderTextColor="#888"
-      secureTextEntry={secureTextEntry}
+      secureTextEntry={!!secureTextEntry}
+      autoCorrect={false}
+      autoCapitalize="none"
+      selectionColor="#3d215b"
       {...props}
     />
     {showToggle && (
@@ -43,6 +46,8 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     paddingVertical: 12,
+    color: '#222',
+    fontSize: 16,
   },
   toggleButton: {
     padding: 4,

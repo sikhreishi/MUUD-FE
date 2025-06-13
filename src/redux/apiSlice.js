@@ -9,7 +9,7 @@ export const apiSlice = createApi({
     prepareHeaders: async (headers, { getState }) => {
       const token = await AsyncStorage.getItem('token');
       if (token) {
-        headers.set('authorization', `Bearer ${token}`);
+        headers.set('Authorization', `Bearer ${token}`);
       }
       return headers;
     },
@@ -37,7 +37,10 @@ export const apiSlice = createApi({
       }),
     }),
     getJournalEntries: builder.query({
-      query: () => '/journal',
+      query: (userId) => ({
+        url: `/journal/user/${userId}`,
+        method: 'GET',
+      }),
     }),
     addJournalEntry: builder.mutation({
       query: (entry) => ({
@@ -48,13 +51,16 @@ export const apiSlice = createApi({
     }),
     addContact: builder.mutation({
       query: (contact) => ({
-        url: '/contacts',
+        url: '/contacts/add',
         method: 'POST',
         body: contact,
       }),
     }),
     getContacts: builder.query({
-      query: () => '/contacts',
+      query: (userId) => ({
+        url: `/contacts/user/${userId}`,
+        method: 'GET',
+      }),
     }),
   }),
 });
